@@ -1,0 +1,20 @@
+.venv/
+.test-deps/
+__pycache__/
+*.pyc
+exports/
+database/*.db
+database/.flask_secret_key
+user_uploads/*
+!user_uploads/.gitkeep
+
+# Local archive and generated or private data
+manual_archive/
+.env
+.env.*
+!.env.example
+instance/
+database/*.sqlite
+database/*.sqlite3
+user_uploads/*
+!user_uploads/.gitkeep

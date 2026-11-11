@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}{{ project["name"] }}{% endblock %}
+
+{% block content %}
+<section class="section-header">
+  <div>
+    <p class="eyebrow">Project</p>
+    <h1>{{ project["name"] }}</h1>
+    <p class="lede">{{ project["description"] or "No description added." }}</p>
+  </div>
+  <div class="action-row">
+    <a class="button button-secondary" href="/projects/{{ project['id'] }}/theme">Edit Theme</a>
+    <a class="button button-primary" href="/projects/{{ project['id'] }}/export">Export Static Site</a>
+    <form method="POST" action="/projects/{{ project['id'] }}/delete">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+      <button class="button button-danger" type="submit">Delete Project</button>
+    </form>
+  </div>
+</section>
+
+<section class="panel">
+  <h2>Pages</h2>
+  {% if pages %}
+    <ul class="item-list">
+      {% for page in pages %}
+        <li>
+          <div>
+            <strong>{{ page["title"] }}</strong>
+            <span class="meta">/{{ page["slug"] }}</span>
+          </div>
+          <div class="action-row">
+            <a class="button button-small" href="/pages/{{ page['id'] }}">Open Editor</a>
+            <form method="POST" action="/projects/{{ project['id'] }}/pages/{{ page['id'] }}/delete">
+              <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+              <button class="button button-small button-danger" type="submit">Delete</button>
+            </form>
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  <form class="inline-form" method="POST" action="/projects/{{ project['id'] }}/pages/new">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+    <label for="page_title">Add page</label>
+    <input id="page_title" type="text" name="page_title" placeholder="About" required />
+    <button class="button button-secondary" type="submit">Add Page</button>
+  </form>
+</section>
+
+<section class="panel panel-muted">
+  <h2>Project Details</h2>
+  <dl class="detail-list">
+    <div>
+      <dt>Created</dt>
+      <dd>{{ project["created_at"] }}</dd>
+    </div>
+    <div>
+      <dt>Updated</dt>
+      <dd>{{ project["updated_at"] }}</dd>
+    </div>
+  </dl>
+</section>
+{% endblock %}

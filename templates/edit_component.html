@@ -1,0 +1,332 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Component{% endblock %}
+
+{% block content %}
+{% macro size_field(component) %}
+  <div class="field">
+    <label for="size">Size</label>
+    <select id="size" name="size">
+      {% set current_size = component["component_data"].get("size", "medium") %}
+      <option value="small" {% if current_size == "small" %}selected{% endif %}>Small</option>
+      <option value="medium" {% if current_size == "medium" %}selected{% endif %}>Medium</option>
+      <option value="large" {% if current_size == "large" %}selected{% endif %}>Large</option>
+    </select>
+  </div>
+{% endmacro %}
+
+{% macro alignment_field(component, field_id='alignment') %}
+  <div class="field">
+    <label for="{{ field_id }}">Alignment</label>
+    <select id="{{ field_id }}" name="alignment">
+      {% set current_alignment = component["component_data"].get("alignment", "center") %}
+      <option value="left" {% if current_alignment == "left" %}selected{% endif %}>Left</option>
+      <option value="center" {% if current_alignment == "center" %}selected{% endif %}>Center</option>
+      <option value="right" {% if current_alignment == "right" %}selected{% endif %}>Right</option>
+    </select>
+  </div>
+{% endmacro %}
+
+<section class="section-header">
+  <div>
+    <p class="eyebrow">Component</p>
+    <h1>Edit {{ component["component_type"]|title }}</h1>
+  </div>
+  <a class="button button-secondary" href="/pages/{{ component['page_id'] }}">Back to Page</a>
+</section>
+
+<section class="panel form-panel">
+  {% if component["component_type"] == "hero" %}
+    <form method="POST">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+      <div class="field">
+        <label for="title">Title</label>
+        <input id="title" type="text" name="title" value="{{ component['component_data'].get('title', '') }}" required />
+      </div>
+
+      <div class="field">
+        <label for="subtitle">Subtitle</label>
+        <input id="subtitle" type="text" name="subtitle" value="{{ component['component_data'].get('subtitle', '') }}" />
+      </div>
+
+      {{ alignment_field(component) }}
+      {{ size_field(component) }}
+
+      <button class="button button-primary" type="submit">Save Component</button>
+    </form>
+  {% elif component["component_type"] == "text" %}
+    <form method="POST">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+      <div class="field">
+        <label for="content">Content</label>
+        <textarea id="content" name="content" rows="10" required>{{ component['component_data'].get('content', '') }}</textarea>
+      </div>
+
+      {{ size_field(component) }}
+
+      <button class="button button-primary" type="submit">Save Component</button>
+    </form>
+  {% elif component["component_type"] == "image" %}
+    <form action="/components/{{ component['id'] }}/image" method="POST" enctype="multipart/form-data">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+      {% if component["component_data"].get("image_path") %}
+        <div class="current-media component-align-{{ component['component_data'].get('alignment', 'center') }}">
+          <img
+            src="{{ url_for('uploaded_file', filename=component['component_data']['image_path']) }}"
+            alt="{{ component['component_data'].get('alt_text', '') }}"
+          />
+        </div>
+      {% endif %}
+
+      <div class="field">
+        <label for="image">Image file</label>
+        <input id="image" type="file" name="image" accept="image/png,image/jpeg,image/gif,image/webp" />
+      </div>
+
+      <div class="field">
+        <label for="alt_text">Alt text</label>
+        <input id="alt_text" type="text" name="alt_text" value="{{ component['component_data'].get('alt_text', '') }}" />
+      </div>
+
+      {{ alignment_field(component, 'image_alignment') }}
+      {{ size_field(component) }}
+
+      <button class="button button-primary" type="submit">Save Image</button>
+    </form>
+  {% elif component["component_type"] == "gallery" %}
+    <form method="POST" enctype="multipart/form-data">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+      {% set images = component["component_data"].get("images", []) %}
+      {% if images %}
+        <div class="preview-gallery current-gallery component-align-{{ component['component_data'].get('alignment', 'center') }}">
+          {% for image in images %}
+            <img
+              src="{{ url_for('uploaded_file', filename=image['image_path']) }}"
+              alt="{{ image.get('alt_text', '') }}"
+            />
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <div class="field">
+        <label for="images">Add gallery images</label>
+        <input id="images" type="file" name="images" accept="image/png,image/jpeg,image/gif,image/webp" multiple />
+      </div>
+
+      <div class="field">
+        <label for="gallery_alt_text">Alt text for new images</label>
+        <input id="gallery_alt_text" type="text" name="alt_text" />
+      </div>
+
+      {{ alignment_field(component, 'gallery_alignment') }}
+      {{ size_field(component) }}
+
+      <button class="button button-primary" type="submit">Save Gallery</button>
+    </form>
+  {% elif component["component_type"] == "features" %}
+    <form method="POST">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+      <div class="field">
+        <label for="heading">Heading</label>
+        <input id="heading" type="text" name="heading" value="{{ component['component_data'].get('heading', '') }}" required />
+      </div>
+      <div class="field">
+        <label for="items">Feature items</label>
+        <textarea id="items" name="items" rows="6" required>{{ component['component_data'].get('items', '') }}</textarea>
+      </div>
+      {{ size_field(component) }}
+      <button class="button button-primary" type="submit">Save Component</button>
+    </form>
+  {% elif component["component_type"] == "cta" %}
+    <form method="POST">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+      <div class="field">
+        <label for="headline">Headline</label>
+        <input id="headline" type="text" name="headline" value="{{ component['component_data'].get('headline', '') }}" required />
+      </div>
+      <div class="field-grid">
+        <div class="field">
+          <label for="button_text">Button text</label>
+          <input id="button_text" type="text" name="button_text" value="{{ component['component_data'].get('button_text', '') }}" required />
+        </div>
+        <div class="field">
+          <label for="button_url">Button URL</label>
+          <input id="button_url" type="text" name="button_url" value="{{ component['component_data'].get('button_url', '') }}" required />
+        </div>
+      </div>
+      {{ size_field(component) }}
+      <button class="button button-primary" type="submit">Save Component</button>
+    </form>
+  {% elif component["component_type"] == "testimonial" %}
+    <form method="POST">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+      <div class="field">
+        <label for="quote">Quote</label>
+        <textarea id="quote" name="quote" rows="5" required>{{ component['component_data'].get('quote', '') }}</textarea>
+      </div>
+      <div class="field">
+        <label for="author">Author</label>
+        <input id="author" type="text" name="author" value="{{ component['component_data'].get('author', '') }}" required />
+      </div>
+      {{ size_field(component) }}
+      <button class="button button-primary" type="submit">Save Component</button>
+    </form>
+  {% elif component["component_type"] == "pricing" %}
+    <form method="POST">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+      <div class="field-grid">
+        <div class="field">
+          <label for="plan">Plan</label>
+          <input id="plan" type="text" name="plan" value="{{ component['component_data'].get('plan', '') }}" required />
+        </div>
+        <div class="field">
+          <label for="price">Price</label>
+          <input id="price" type="text" name="price" value="{{ component['component_data'].get('price', '') }}" required />
+        </div>
+      </div>
+      <div class="field">
+        <label for="features">Included features</label>
+        <textarea id="features" name="features" rows="6" required>{{ component['component_data'].get('features', '') }}</textarea>
+      </div>
+      {{ size_field(component) }}
+      <button class="button button-primary" type="submit">Save Component</button>
+    </form>
+  {% elif component["component_type"] == "contact" %}
+    <form method="POST">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+      <div class="field">
+        <label for="heading">Heading</label>
+        <input id="heading" type="text" name="heading" value="{{ component['component_data'].get('heading', '') }}" required />
+      </div>
+      <div class="field-grid">
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" type="email" name="email" value="{{ component['component_data'].get('email', '') }}" required />
+        </div>
+        <div class="field">
+          <label for="phone">Phone</label>
+          <input id="phone" type="text" name="phone" value="{{ component['component_data'].get('phone', '') }}" />
+        </div>
+      </div>
+      <div class="field">
+        <label for="address">Address</label>
+        <input id="address" type="text" name="address" value="{{ component['component_data'].get('address', '') }}" />
+      </div>
+      {{ size_field(component) }}
+      <button class="button button-primary" type="submit">Save Component</button>
+    </form>
+  {% elif component["component_type"] == "business_card" %}
+    <form method="POST">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+      <div class="field-grid">
+        <div class="field">
+          <label for="name">Name</label>
+          <input id="name" type="text" name="name" value="{{ component['component_data'].get('name', '') }}" required />
+        </div>
+        <div class="field">
+          <label for="role">Role</label>
+          <input id="role" type="text" name="role" value="{{ component['component_data'].get('role', '') }}" />
+        </div>
+      </div>
+      <div class="field-grid">
+        <div class="field">
+          <label for="company">Company</label>
+          <input id="company" type="text" name="company" value="{{ component['component_data'].get('company', '') }}" />
+        </div>
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" type="email" name="email" value="{{ component['component_data'].get('email', '') }}" />
+        </div>
+      </div>
+      <div class="field">
+        <label for="website">Website</label>
+        <input id="website" type="text" name="website" value="{{ component['component_data'].get('website', '') }}" />
+      </div>
+      {{ size_field(component) }}
+      <button class="button button-primary" type="submit">Save Component</button>
+    </form>
+  {% elif component["component_type"] == "product_demo" %}
+    <form method="POST">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+      <div class="field">
+        <label for="title">Title</label>
+        <input id="title" type="text" name="title" value="{{ component['component_data'].get('title', '') }}" required />
+      </div>
+      <div class="field">
+        <label for="description">Description</label>
+        <textarea id="description" name="description" rows="5" required>{{ component['component_data'].get('description', '') }}</textarea>
+      </div>
+      <div class="field">
+        <label for="video_url">Video URL</label>
+        <input id="video_url" type="url" name="video_url" value="{{ component['component_data'].get('video_url', '') }}" />
+      </div>
+      <div class="field-grid">
+        <div class="field">
+          <label for="button_text">Button text</label>
+          <input id="button_text" type="text" name="button_text" value="{{ component['component_data'].get('button_text', '') }}" />
+        </div>
+        <div class="field">
+          <label for="button_url">Button URL</label>
+          <input id="button_url" type="text" name="button_url" value="{{ component['component_data'].get('button_url', '') }}" />
+        </div>
+      </div>
+      {{ size_field(component) }}
+      <button class="button button-primary" type="submit">Save Component</button>
+    </form>
+  {% elif component["component_type"] == "blog_post" %}
+    <form method="POST">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+      <div class="field">
+        <label for="title">Title</label>
+        <input id="title" type="text" name="title" value="{{ component['component_data'].get('title', '') }}" required />
+      </div>
+      <div class="field">
+        <label for="meta">Meta</label>
+        <input id="meta" type="text" name="meta" value="{{ component['component_data'].get('meta', '') }}" />
+      </div>
+      <div class="field">
+        <label for="excerpt">Excerpt</label>
+        <textarea id="excerpt" name="excerpt" rows="5" required>{{ component['component_data'].get('excerpt', '') }}</textarea>
+      </div>
+      {{ size_field(component) }}
+      <button class="button button-primary" type="submit">Save Component</button>
+    </form>
+  {% elif component["component_type"] == "portfolio" %}
+    <form method="POST">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+      <div class="field">
+        <label for="title">Title</label>
+        <input id="title" type="text" name="title" value="{{ component['component_data'].get('title', '') }}" required />
+      </div>
+      <div class="field">
+        <label for="summary">Summary</label>
+        <textarea id="summary" name="summary" rows="4" required>{{ component['component_data'].get('summary', '') }}</textarea>
+      </div>
+      <div class="field">
+        <label for="details">Details</label>
+        <textarea id="details" name="details" rows="5">{{ component['component_data'].get('details', '') }}</textarea>
+      </div>
+      {{ size_field(component) }}
+      <button class="button button-primary" type="submit">Save Component</button>
+    </form>
+  {% elif component["component_type"] == "footer" %}
+    <form method="POST">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+      <div class="field">
+        <label for="copyright">Footer text</label>
+        <input
+          id="copyright"
+          type="text"
+          name="copyright"
+          value="{{ component['component_data'].get('copyright', '') }}"
+          required
+        />
+      </div>
+
+      {{ size_field(component) }}
+
+      <button class="button button-primary" type="submit">Save Component</button>
+    </form>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}TemplateForge{% endblock %}</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/app.css') }}"
+    />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+
+    <header class="app-header">
+      <nav class="top-nav" aria-label="Primary navigation">
+        <a class="brand" href="/">TemplateForge</a>
+        <div class="nav-links">
+          {% if g.current_user %}
+            <a href="/projects">Projects</a>
+            <button class="button button-secondary button-small" type="button" data-open-tutorial>Tutorial</button>
+            <a class="button button-primary" href="/projects/new">New Project</a>
+            <form method="POST" action="/logout">
+              <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+              <button class="button button-small" type="submit">Sign out</button>
+            </form>
+          {% else %}
+            <a href="/login">Sign in</a>
+            <a class="button button-primary" href="/signup">Sign up</a>
+          {% endif %}
+        </div>
+      </nav>
+    </header>
+
+    <main id="main-content" class="page-shell">
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          <section class="notice-stack" aria-label="Status messages">
+            {% for message in messages %}
+              <p class="notice" role="status">{{ message }}</p>
+            {% endfor %}
+          </section>
+        {% endif %}
+      {% endwith %}
+
+      {% block content %}{% endblock %}
+    </main>
+
+    {% if g.current_user %}
+      <div
+        class="tutorial-overlay{% if session.get('show_tutorial') %} is-open{% endif %}"
+        data-tutorial-overlay
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="tutorial-title"
+      >
+        <section class="tutorial-modal">
+          <div class="tutorial-header">
+            <div>
+              <p class="eyebrow">Quick guide</p>
+              <h2 id="tutorial-title">TemplateForge tutorial</h2>
+            </div>
+            <button class="button button-small" type="button" data-close-tutorial>Close</button>
+          </div>
+
+          <div class="tutorial-grid">
+            <article>
+              <h3>Projects</h3>
+              <p>Create a project to start a static website. Each account only sees its own saved projects.</p>
+            </article>
+            <article>
+              <h3>Pages</h3>
+              <p>Add pages inside a project. Each page opens in the editor and gets its own export path.</p>
+            </article>
+            <article>
+              <h3>Components</h3>
+              <p>Use the toolbox to add hero, text, image, gallery, pricing, contact, and other blocks.</p>
+            </article>
+            <article>
+              <h3>Theme</h3>
+              <p>Adjust fonts and colors from the project theme screen before exporting.</p>
+            </article>
+            <article>
+              <h3>Images</h3>
+              <p>Upload JPG, PNG, GIF, or WebP files through image and gallery components.</p>
+            </article>
+            <article>
+              <h3>Export</h3>
+              <p>Export generates HTML, CSS, and copied assets in the exports folder for static hosting.</p>
+            </article>
+          </div>
+        </section>
+      </div>
+
+      <script>
+        const tutorialOverlay = document.querySelector("[data-tutorial-overlay]");
+        const openTutorialButtons = document.querySelectorAll("[data-open-tutorial]");
+        const closeTutorialButtons = document.querySelectorAll("[data-close-tutorial]");
+
+        function setTutorialOpen(isOpen) {
+          tutorialOverlay.classList.toggle("is-open", isOpen);
+        }
+
+        openTutorialButtons.forEach((button) => {
+          button.addEventListener("click", () => setTutorialOpen(true));
+        });
+
+        closeTutorialButtons.forEach((button) => {
+          button.addEventListener("click", () => {
+            setTutorialOpen(false);
+            fetch("/tutorial/seen", {
+              method: "POST",
+              headers: { "X-CSRF-Token": "{{ csrf_token() }}" }
+            });
+          });
+        });
+      </script>
+    {% endif %}
+  </body>
+</html>

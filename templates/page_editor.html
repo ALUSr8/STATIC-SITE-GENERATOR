@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block title %}Edit {{ page["title"] }}{% endblock %}
+
+{% block content %}
+<section class="section-header">
+  <div>
+    <p class="eyebrow">Page editor</p>
+    <h1>{{ page["title"] }}</h1>
+  </div>
+  <a class="button button-secondary" href="/projects/{{ page['project_id'] }}">Back to Project</a>
+</section>
+
+<section class="editor-layout">
+  <aside class="toolbox" aria-label="Component toolbox">
+    <h2>Add Component</h2>
+    <div class="tool-list">
+      {% for key, component in component_types.items() %}
+        <a class="button button-secondary" href="/pages/{{ page['id'] }}/add/{{ key }}">
+          {{ component["name"] }}
+        </a>
+      {% endfor %}
+    </div>
+  </aside>
+
+  <section
+    class="canvas"
+    aria-label="Page components"
+    style="
+      --theme-background: {{ theme['background_color'] }};
+      --theme-text: {{ theme['text_color'] }};
+      --theme-primary: {{ theme['primary_color'] }};
+      --theme-secondary: {{ theme['secondary_color'] }};
+      --theme-font: {{ theme['font_family'] }};
+    "
+  >
+    {% if components %}
+      {% for component in components %}
+        <article class="component-preview component-size-{{ component['component_data'].get('size', 'medium') }} component-align-{{ component['component_data'].get('alignment', 'center') }}">
+          <div class="component-toolbar">
+            <span class="component-type">{{ component["component_type"]|title }}</span>
+            <div class="action-row">
+              {% if not loop.first %}
+                <form method="POST" action="/components/{{ component['id'] }}/move/up">
+                  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+                  <button class="button button-small" type="submit">Move Up</button>
+                </form>
+              {% endif %}
+              {% if not loop.last %}
+                <form method="POST" action="/components/{{ component['id'] }}/move/down">
+                  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+                  <button class="button button-small" type="submit">Move Down</button>
+                </form>
+              {% endif %}
+              <a class="button button-small" href="/components/{{ component['id'] }}/edit">Edit</a>
+              <form method="POST" action="/components/{{ component['id'] }}/delete">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+                <button class="button button-small button-danger" type="submit">Delete</button>
+              </form>
+            </div>
+          </div>
+
+          {% if component["component_type"] == "hero" %}
+            <section class="preview-hero component-align-{{ component['component_data'].get('alignment', 'center') }}">
+              <h2>{{ component["component_data"].get("title", "") }}</h2>
+              <p>{{ component["component_data"].get("subtitle", "") }}</p>
+            </section>
+          {% elif component["component_type"] == "text" %}
+            <section class="preview-text">
+              <p>{{ component["component_data"].get("content", "") }}</p>
+            </section>
+          {% elif component["component_type"] == "image" %}
+            <section class="preview-media component-align-{{ component['component_data'].get('alignment', 'center') }}">
+              {% if component["component_data"].get("image_path") %}
+                <img
+                  src="{{ url_for('uploaded_file', filename=component['component_data']['image_path']) }}"
+                  alt="{{ component['component_data'].get('alt_text', '') }}"
+                />
+              {% else %}
+                <p class="empty-note">No image uploaded yet.</p>
+              {% endif %}
+            </section>
+          {% elif component["component_type"] == "gallery" %}
+            <section class="preview-gallery component-align-{{ component['component_data'].get('alignment', 'center') }}">
+              {% set images = component["component_data"].get("images", []) %}
+              {% if images %}
+                {% for image in images %}
+                  <img
+                    src="{{ url_for('uploaded_file', filename=image['image_path']) }}"
+                    alt="{{ image.get('alt_text', '') }}"
+                  />
+                {% endfor %}
+              {% else %}
+                <p class="empty-note">No gallery images uploaded yet.</p>
+              {% endif %}
+            </section>
+          {% elif component["component_type"] == "features" %}
+            <section class="preview-feature-grid">
+              <h2>{{ component["component_data"].get("heading", "") }}</h2>
+              <div>
+                {% for item in component["component_data"].get("items", "").splitlines() %}
+                  {% if item %}
+                    <p>{{ item }}</p>
+                  {% endif %}
+                {% endfor %}
+              </div>
+            </section>
+          {% elif component["component_type"] == "cta" %}
+            <section class="preview-cta">
+              <h2>{{ component["component_data"].get("headline", "") }}</h2>
+              <a class="button button-primary" href="{{ component['component_data'].get('button_url', '#')|safe_link_url }}">
+                {{ component["component_data"].get("button_text", "") }}
+              </a>
+            </section>
+          {% elif component["component_type"] == "testimonial" %}
+            <section class="preview-quote">
+              <blockquote>{{ component["component_data"].get("quote", "") }}</blockquote>
+              <p>{{ component["component_data"].get("author", "") }}</p>
+            </section>
+          {% elif component["component_type"] == "pricing" %}
+            <section class="preview-card-block">
+              <h2>{{ component["component_data"].get("plan", "") }}</h2>
+              <p class="preview-price">{{ component["component_data"].get("price", "") }}</p>
+              <p>{{ component["component_data"].get("features", "").replace("\n", ", ") }}</p>
+            </section>
+          {% elif component["component_type"] == "contact" %}
+            <section class="preview-card-block">
+              <h2>{{ component["component_data"].get("heading", "") }}</h2>
+              <p>{{ component["component_data"].get("email", "") }}</p>
+              <p>{{ component["component_data"].get("phone", "") }}</p>
+              <p>{{ component["component_data"].get("address", "") }}</p>
+            </section>
+          {% elif component["component_type"] == "business_card" %}
+            <section class="preview-card-block">
+              <h2>{{ component["component_data"].get("name", "") }}</h2>
+              <p>{{ component["component_data"].get("role", "") }} - {{ component["component_data"].get("company", "") }}</p>
+              <p>{{ component["component_data"].get("email", "") }}</p>
+              <p>{{ component["component_data"].get("website", "") }}</p>
+            </section>
+          {% elif component["component_type"] == "product_demo" %}
+            <section class="preview-split">
+              <div>
+                <h2>{{ component["component_data"].get("title", "") }}</h2>
+                <p>{{ component["component_data"].get("description", "") }}</p>
+                {% if component["component_data"].get("video_url")|safe_link_url("") %}
+                  <p><a href="{{ component['component_data'].get('video_url')|safe_link_url('') }}">Video demo</a></p>
+                {% endif %}
+              </div>
+              <a class="button button-primary" href="{{ component['component_data'].get('button_url', '#')|safe_link_url }}">
+                {{ component["component_data"].get("button_text", "") }}
+              </a>
+            </section>
+          {% elif component["component_type"] == "blog_post" %}
+            <section class="preview-card-block">
+              <p class="meta">{{ component["component_data"].get("meta", "") }}</p>
+              <h2>{{ component["component_data"].get("title", "") }}</h2>
+              <p>{{ component["component_data"].get("excerpt", "") }}</p>
+            </section>
+          {% elif component["component_type"] == "portfolio" %}
+            <section class="preview-card-block">
+              <h2>{{ component["component_data"].get("title", "") }}</h2>
+              <p>{{ component["component_data"].get("summary", "") }}</p>
+              <p>{{ component["component_data"].get("details", "").replace("\n", ", ") }}</p>
+            </section>
+          {% elif component["component_type"] == "footer" %}
+            <footer class="preview-footer">{{ component["component_data"].get("copyright", "") }}</footer>
+          {% endif %}
+        </article>
+      {% endfor %}
+    {% else %}
+      <section class="empty-state">
+        <h2>No components yet</h2>
+        <p>Add a hero, text block, image, gallery, or footer from the toolbox.</p>
+      </section>
+    {% endif %}
+  </section>
+</section>
+{% endblock %}

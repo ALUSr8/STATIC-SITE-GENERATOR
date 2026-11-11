@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Sign in{% endblock %}
+
+{% block content %}
+<section class="auth-layout">
+  <div class="auth-copy">
+    <p class="eyebrow">Welcome back</p>
+    <h1>Sign in to TemplateForge.</h1>
+    <p class="lede">Use your username and password to return to your saved projects.</p>
+  </div>
+
+  <section class="panel auth-panel" aria-label="Sign in form">
+    <div class="auth-tabs" aria-label="Account actions">
+      <a class="auth-tab active" href="/login">Sign in</a>
+      <a class="auth-tab" href="/signup">Sign up</a>
+    </div>
+
+    <form method="POST" action="/login">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+      <div class="field">
+        <label for="username">Username</label>
+        <input id="username" name="username" type="text" value="{{ username or '' }}" autocomplete="username" required autofocus />
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required />
+      </div>
+
+      <button class="button button-primary" type="submit">Sign in</button>
+    </form>
+  </section>
+</section>
+{% endblock %}

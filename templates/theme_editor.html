@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Theme Editor{% endblock %}
+
+{% block content %}
+<section class="section-header">
+  <div>
+    <p class="eyebrow">Theme</p>
+    <h1>Theme Editor</h1>
+  </div>
+  <a class="button button-secondary" href="/projects/{{ project_id }}">Back to Project</a>
+</section>
+
+<section class="editor-layout">
+  <section class="panel form-panel">
+    <form method="POST">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+      <div class="field">
+        <label for="font_family">Font family</label>
+        <select id="font_family" name="font_family">
+          <option value="Arial" {% if theme["font_family"] == "Arial" %}selected{% endif %}>Arial</option>
+          <option value="Helvetica" {% if theme["font_family"] == "Helvetica" %}selected{% endif %}>Helvetica</option>
+          <option value="Verdana" {% if theme["font_family"] == "Verdana" %}selected{% endif %}>Verdana</option>
+          <option value="Tahoma" {% if theme["font_family"] == "Tahoma" %}selected{% endif %}>Tahoma</option>
+          <option value="Trebuchet MS" {% if theme["font_family"] == "Trebuchet MS" %}selected{% endif %}>Trebuchet MS</option>
+          <option value="Georgia" {% if theme["font_family"] == "Georgia" %}selected{% endif %}>Georgia</option>
+          <option value="Times New Roman" {% if theme["font_family"] == "Times New Roman" %}selected{% endif %}>Times New Roman</option>
+          <option value="Courier New" {% if theme["font_family"] == "Courier New" %}selected{% endif %}>Courier New</option>
+          <option value="Segoe UI" {% if theme["font_family"] == "Segoe UI" %}selected{% endif %}>Segoe UI</option>
+          <option value="Roboto" {% if theme["font_family"] == "Roboto" %}selected{% endif %}>Roboto</option>
+          <option value="Open Sans" {% if theme["font_family"] == "Open Sans" %}selected{% endif %}>Open Sans</option>
+          <option value="Lato" {% if theme["font_family"] == "Lato" %}selected{% endif %}>Lato</option>
+        </select>
+      </div>
+
+      <div class="field-grid">
+        <div class="field">
+          <label for="primary_color">Primary color</label>
+          <input id="primary_color" type="color" name="primary_color" value="{{ theme['primary_color'] }}" />
+        </div>
+
+        <div class="field">
+          <label for="secondary_color">Secondary color</label>
+          <input id="secondary_color" type="color" name="secondary_color" value="{{ theme['secondary_color'] }}" />
+        </div>
+
+        <div class="field">
+          <label for="background_color">Background color</label>
+          <input id="background_color" type="color" name="background_color" value="{{ theme['background_color'] }}" />
+        </div>
+
+        <div class="field">
+          <label for="text_color">Text color</label>
+          <input id="text_color" type="color" name="text_color" value="{{ theme['text_color'] }}" />
+        </div>
+      </div>
+
+      <button class="button button-primary" type="submit">Save Theme</button>
+    </form>
+  </section>
+
+  <section
+    class="theme-preview"
+    aria-label="Theme preview"
+    style="
+      background-color: {{ theme['background_color'] }};
+      color: {{ theme['text_color'] }};
+      font-family: {{ theme['font_family'] }};
+    "
+  >
+    <p style="color: {{ theme['secondary_color'] }}">Preview</p>
+    <h2 style="color: {{ theme['primary_color'] }}">Sample Website Heading</h2>
+    <p>This preview shows how body text, heading color, and secondary color work together.</p>
+  </section>
+</section>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Export Ready{% endblock %}
+
+{% block content %}
+<section class="panel export-status" data-export-url="{{ export_url }}">
+  <p class="eyebrow">Export</p>
+  <h1>Opening exported site</h1>
+  <p class="lede">Your static site is opening in a new tab.</p>
+  <p class="notice">Exported project folder: {{ export_folder }}</p>
+  <p id="export-message" class="notice" hidden>EXPORT WAS COMPLETED</p>
+  <div class="action-row">
+    <a class="button button-primary" href="{{ export_url }}" target="_blank" rel="noopener">Open Export</a>
+    <a class="button button-secondary" href="/projects">Back to Projects</a>
+  </div>
+</section>
+
+<script>
+  const statusPanel = document.querySelector(".export-status");
+  const message = document.querySelector("#export-message");
+  const exportTab = window.open(statusPanel.dataset.exportUrl, "_blank");
+
+  function showExportComplete() {
+    message.hidden = false;
+  }
+
+  if (!exportTab) {
+    showExportComplete();
+  } else {
+    const watcher = window.setInterval(() => {
+      if (exportTab.closed) {
+        window.clearInterval(watcher);
+        showExportComplete();
+      }
+    }, 700);
+
+    window.addEventListener("focus", showExportComplete, { once: true });
+  }
+</script>
+{% endblock %}

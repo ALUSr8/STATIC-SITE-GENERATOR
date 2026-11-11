@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Projects{% endblock %}
+
+{% block content %}
+<section class="section-header">
+  <div>
+    <p class="eyebrow">Workspace</p>
+    <h1>Projects</h1>
+  </div>
+  <a class="button button-primary" href="/projects/new">New Project</a>
+</section>
+
+{% if projects %}
+  <div class="project-grid">
+    {% for project in projects %}
+      <article class="project-card">
+        <h2>
+          <a href="/projects/{{ project['id'] }}">{{ project["name"] }}</a>
+        </h2>
+        <p>{{ project["description"] or "No description added." }}</p>
+        <p class="meta">Updated {{ project["updated_at"] }}</p>
+        <form method="POST" action="/projects/{{ project['id'] }}/delete">
+          <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+          <button class="button button-small button-danger" type="submit">Delete</button>
+        </form>
+      </article>
+    {% endfor %}
+  </div>
+{% else %}
+  <section class="empty-state">
+    <h2>No projects yet</h2>
+    <p>Create your first project to start building a static website.</p>
+    <a class="button button-primary" href="/projects/new">Create Project</a>
+  </section>
+{% endif %}
+{% endblock %}

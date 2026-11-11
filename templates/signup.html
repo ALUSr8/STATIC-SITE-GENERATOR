@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Sign up{% endblock %}
+
+{% block content %}
+<section class="auth-layout">
+  <div class="auth-copy">
+    <p class="eyebrow">New workspace</p>
+    <h1>Create your account.</h1>
+    <p class="lede">Projects stay tied to your account and remain available between sessions.</p>
+  </div>
+
+  <section class="panel auth-panel" aria-label="Sign up form">
+    <div class="auth-tabs" aria-label="Account actions">
+      <a class="auth-tab" href="/login">Sign in</a>
+      <a class="auth-tab active" href="/signup">Sign up</a>
+    </div>
+
+    <form method="POST" action="/signup">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+      <div class="field">
+        <label for="username">Username</label>
+        <input id="username" name="username" type="text" value="{{ username or '' }}" autocomplete="username" required autofocus />
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" autocomplete="new-password" required />
+      </div>
+
+      <button class="button button-primary" type="submit">Create account</button>
+    </form>
+  </section>
+</section>
+{% endblock %}

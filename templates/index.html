@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}TemplateForge{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div>
+    <p class="eyebrow">Static site generator</p>
+    <h1>Build and export simple static websites.</h1>
+    <p class="lede">
+      Create projects, add pages, arrange content blocks, tune the theme, and export a folder ready for static hosting.
+    </p>
+  </div>
+  <div class="action-row">
+    <a class="button button-primary" href="/projects/new">Create Project</a>
+    <a class="button button-secondary" href="/projects">View Projects</a>
+  </div>
+</section>
+
+<section class="feature-grid" aria-label="Workflow">
+  <article class="feature-card">
+    <h2>1. Create</h2>
+    <p>Start with a project. TemplateForge automatically adds a homepage and a default theme.</p>
+  </article>
+  <article class="feature-card">
+    <h2>2. Compose</h2>
+    <p>Add hero, text, image, gallery, and footer components from the page editor.</p>
+  </article>
+  <article class="feature-card">
+    <h2>3. Export</h2>
+    <p>Generate static HTML, CSS, and copied assets for deployment.</p>
+  </article>
+</section>
+{% endblock %}

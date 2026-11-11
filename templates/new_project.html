@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}New Project{% endblock %}
+
+{% block content %}
+<section class="section-header">
+  <div>
+    <p class="eyebrow">Start</p>
+    <h1>Create New Project</h1>
+    <p class="lede">A homepage and default theme will be created automatically.</p>
+  </div>
+</section>
+
+<section class="panel form-panel">
+  <form method="POST">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+    <div class="field">
+      <label for="project_name">Project name</label>
+      <input id="project_name" type="text" name="project_name" required />
+    </div>
+
+    <div class="field">
+      <label for="project_description">Description</label>
+      <textarea id="project_description" name="project_description" rows="5"></textarea>
+    </div>
+
+    <button class="button button-primary" type="submit">Create Project</button>
+  </form>
+</section>
+{% endblock %}
